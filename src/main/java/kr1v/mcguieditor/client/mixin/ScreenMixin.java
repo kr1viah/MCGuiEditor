@@ -1,11 +1,9 @@
 package kr1v.mcguieditor.client.mixin;
 
-import static kr1v.mcguieditor.client.GuiEditScreen.addChildIndex;
 import static kr1v.mcguieditor.client.McguieditorClient.*;
 
 import kr1v.mcguieditor.client.GuiEditScreen;
 import kr1v.mcguieditor.client.Window;
-import kr1v.mcguieditor.client.WindowSet;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
@@ -20,6 +18,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.List;
 
 @Mixin(Screen.class)
 public abstract class ScreenMixin {
@@ -41,19 +41,16 @@ public abstract class ScreenMixin {
         Integer guiScale = MinecraftClient.getInstance().options.getGuiScale().getValue();
         if (original instanceof ClickableWidget widget && !(original instanceof TextIconButtonWidget.IconOnly)) {
             System.out.println(original.getClass().getName() + " is instanceof Widget");
-            for (WindowSet windowSet : windowSets) {
-                if (windowSet.screenClass.equals(this.getTitle().getString())) {
-                    System.out.println(this.getClass().getName());
-                    Window window = windowSet.windows.getFirst();
-                    for (Window window1: windowSet.windows) {
-                        if (window1.navigationOrder == addChildIndex) window = window1;
-                    }
-                    System.out.println("Setting height, width, x and y to: " + window.size.y + window.size.x + window.pos.x + window.pos.y);
-                    System.out.println();
+            System.out.println(this.getTitle().getString());
+
+            List<Window> windowSet = windowSets.get(this.getTitle().getString());
+            if (windowSet == null) return original;
+            for (Window window: windowSet) {
+                if (window.checkIfSame(widget)) {
+                    System.out.println("Setting height, width, x and y to: " + window.size.y + ", " + window.size.x + ", " + window.pos.x + ", " + window.pos.y);
                     widget.setHeight((int)window.size.y / guiScale);
                     widget.setWidth((int)window.size.x / guiScale);
                     widget.setPosition((int)(window.pos.x / guiScale), (int)(window.pos.y / guiScale));
-                    addChildIndex++;
                     return (T)widget;
                 }
             }

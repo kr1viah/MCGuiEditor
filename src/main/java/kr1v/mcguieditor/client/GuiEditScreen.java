@@ -12,7 +12,6 @@ import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextIconButtonWidget;
-import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
@@ -43,28 +42,23 @@ public class GuiEditScreen extends Screen {
         windowPositions = new ArrayList<>();
         int windowFlags = NoSavedSettings + NoTitleBar + NoCollapse;
         Integer guiScale = MinecraftClient.getInstance().options.getGuiScale().getValue();
-        int index = 0;
 
         if (firstRun) {
             counter++;
         }
 
         for (Drawable drawable : ((ScreenAccessor) parent).getDrawables()) {
-            if (drawable instanceof Widget widget) {
+            if (drawable instanceof ClickableWidget widget) {
                 if (widget instanceof TextIconButtonWidget.IconOnly) continue;
                 ImGui.setNextWindowPos(widget.getX() * guiScale, widget.getY() * guiScale, ImGuiCond.Appearing);
                 ImGui.setNextWindowSize(widget.getWidth() * guiScale, widget.getHeight() * guiScale, ImGuiCond.Appearing);
-                String name = "";
-                if (widget instanceof ClickableWidget clickableWidget) {
-                    name = clickableWidget.getMessage().getString();
-                }
+                String name = widget.getMessage().getString();
                 if (name.isEmpty()) name = "?";
                 ImGui.begin(name + counter, new ImBoolean(true), windowFlags);
                 ImGui.text(name);
-                windowPositions.add(new Window(ImGui.getWindowPos(), ImGui.getWindowSize(), index));
+                windowPositions.add(new Window(ImGui.getWindowPos(), ImGui.getWindowSize(), widget));
                 ImGui.end();
             }
-            index++;
         }
         firstRun = false;
     }
@@ -72,12 +66,7 @@ public class GuiEditScreen extends Screen {
     @Override
     public void close() {
         System.out.println("New thingy");
-        windowSets.removeIf(n -> n.screenClass.equals(this.parent.getTitle().getString()));
-        windowSets.add(new WindowSet(windowPositions, this.parent.getTitle().getString()));
-
-        for (Window windowPosition : windowPositions) {
-            System.out.println("navigationOrder: " + windowPosition.navigationOrder + ", position: " + windowPosition.pos.x + ", " + windowPosition.pos.y);
-        }
+        windowSets.put(this.parent.getTitle().getString(), windowPositions);
         System.out.println();
         System.out.println();
         addChildIndex = 0;

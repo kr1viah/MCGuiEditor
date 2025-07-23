@@ -1,18 +1,16 @@
 package kr1v.mcguieditor.client;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper.*;
 
 public class McguieditorClient implements ClientModInitializer {
-    public static List<WindowSet> windowSets = new ArrayList<>();
+    public static Map<String, List<Window>> windowSets = new HashMap<>();
     public static KeyBinding keyBinding;
     public static int counter = 0;
     @Override
