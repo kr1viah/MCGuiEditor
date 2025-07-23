@@ -2,6 +2,7 @@ package kr1v.mcguieditor.client;
 
 import imgui.ImGui;
 import imgui.ImGuiIO;
+import imgui.ImVec2;
 import imgui.flag.ImGuiCond;
 import imgui.type.ImBoolean;
 import kr1v.mcguieditor.client.imgui.ImGuiImpl;
@@ -11,7 +12,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.TextIconButtonWidget;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
@@ -49,14 +49,15 @@ public class GuiEditScreen extends Screen {
 
         for (Drawable drawable : ((ScreenAccessor) parent).getDrawables()) {
             if (drawable instanceof ClickableWidget widget) {
-                if (widget instanceof TextIconButtonWidget.IconOnly) continue;
+//                if (widget instanceof TextIconButtonWidget.IconOnly) continue;
                 ImGui.setNextWindowPos(widget.getX() * guiScale, widget.getY() * guiScale, ImGuiCond.Appearing);
                 ImGui.setNextWindowSize(widget.getWidth() * guiScale, widget.getHeight() * guiScale, ImGuiCond.Appearing);
                 String name = widget.getMessage().getString();
                 if (name.isEmpty()) name = "?";
                 ImGui.begin(name + counter, new ImBoolean(true), windowFlags);
                 ImGui.text(name);
-                windowPositions.add(new Window(ImGui.getWindowPos(), ImGui.getWindowSize(), widget));
+                assert client != null;
+                windowPositions.add(new Window(ImGui.getWindowPos(), ImGui.getWindowSize(), new ImVec2(client.getWindow().getWidth(), client.getWindow().getHeight()), widget));
                 ImGui.end();
             }
         }
@@ -71,7 +72,7 @@ public class GuiEditScreen extends Screen {
         System.out.println();
         addChildIndex = 0;
         assert client != null;
-        client.setScreen(parent);
+        client.setScreen(null);
     }
 
     @Override
