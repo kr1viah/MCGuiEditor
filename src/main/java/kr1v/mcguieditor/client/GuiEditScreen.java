@@ -72,8 +72,8 @@ public class GuiEditScreen extends Screen {
     @Override
     public void close() {
         System.out.println("New thingy");
-        windowSets.removeIf(n -> n.screenClass.equals(this.parent.getClass().getName()));
-        windowSets.add(new WindowSet(windowPositions, this.parent.getClass().getName()));
+        windowSets.removeIf(n -> n.screenClass.equals(this.parent.getTitle().getString()));
+        windowSets.add(new WindowSet(windowPositions, this.parent.getTitle().getString()));
 
         for (Window windowPosition : windowPositions) {
             System.out.println("navigationOrder: " + windowPosition.navigationOrder + ", position: " + windowPosition.pos.x + ", " + windowPosition.pos.y);

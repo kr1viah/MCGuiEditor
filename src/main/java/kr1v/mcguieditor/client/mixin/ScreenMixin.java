@@ -15,13 +15,16 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextIconButtonWidget;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Screen.class)
-public class ScreenMixin {
+public abstract class ScreenMixin {
+
+    @Shadow public abstract Text getTitle();
 
     @Inject(method = "keyPressed", at = @At("HEAD"))
     public void keyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
@@ -39,7 +42,7 @@ public class ScreenMixin {
         if (original instanceof ClickableWidget widget && !(original instanceof TextIconButtonWidget.IconOnly)) {
             System.out.println(original.getClass().getName() + " is instanceof Widget");
             for (WindowSet windowSet : windowSets) {
-                if (windowSet.screenClass.equals(this.getClass().getName())) {
+                if (windowSet.screenClass.equals(this.getTitle().getString())) {
                     System.out.println(this.getClass().getName());
                     Window window = windowSet.windows.getFirst();
                     for (Window window1: windowSet.windows) {
