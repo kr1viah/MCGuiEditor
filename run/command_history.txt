@@ -1,3 +1,0 @@
-/time set 0
-/kill @e[type=!player]
-/setblock ~ ~ ~ minecraft:dispenser
