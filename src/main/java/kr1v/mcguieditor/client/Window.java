@@ -4,7 +4,6 @@ import imgui.ImVec2;
 import net.minecraft.client.gui.widget.ClickableWidget;
 
 public class Window {
-    // should be relative to screen size somehow..
     public ImVec2 pos;
     public ImVec2 size;
     public ImVec2 originalScreenSize;

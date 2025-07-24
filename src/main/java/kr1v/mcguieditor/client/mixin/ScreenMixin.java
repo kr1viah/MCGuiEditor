@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
@@ -35,6 +36,11 @@ public abstract class ScreenMixin {
         }
     }
 
+    @Inject(method = "init()V", at = @At("RETURN"))
+    public void init(CallbackInfo ci) {
+        resetToDefaults.remove(this.getTitle().getString());
+    }
+
     @ModifyVariable(method = "addSelectableChild", at = @At("HEAD"), index = 1, argsOnly = true)
     private <T extends Element & Selectable> T addSelectableChild(T original) {
         return handleThingamajig(original);
@@ -48,23 +54,19 @@ public abstract class ScreenMixin {
     @Unique
     @SuppressWarnings("unchecked")
     private <T extends Element & Selectable> T handleThingamajig(T original) {
+        if (resetToDefaults.contains(this.getTitle().getString())) {
+            return original;
+        }
         Integer guiScale = MinecraftClient.getInstance().options.getGuiScale().getValue();
         if (original instanceof ClickableWidget widget/* && !(original instanceof TextIconButtonWidget.IconOnly)*/) {
             System.out.println(original.getClass().getName() + " is instanceof Widget");
-            System.out.println(this.getTitle().getString());
-
             List<Window> windowSet = windowSets.get(this.getTitle().getString());
             if (windowSet == null) return original;
             for (Window window: windowSet) {
                 if (window.checkIfSame(widget)) {
-                    System.out.println("Setting height, width, x and y to: " + window.size.y + ", " + window.size.x + ", " + window.pos.x + ", " + window.pos.y);
                     widget.setHeight((int)window.size.y / guiScale);
                     widget.setWidth((int)window.size.x / guiScale);
-
-                    net.minecraft.client.util.Window mcwindow = MinecraftClient.getInstance().getWindow();
-                    float newX = window.pos.x;
-                    float newY = window.pos.y;
-                    widget.setPosition((int)(newX / guiScale), (int)(newY / guiScale));
+                    widget.setPosition((int)(window.pos.x / guiScale), (int)(window.pos.y / guiScale));
                     return (T)widget;
                 }
             }

@@ -14,12 +14,12 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.text.Text;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static imgui.flag.ImGuiWindowFlags.*;
-import static kr1v.mcguieditor.client.McguieditorClient.counter;
-import static kr1v.mcguieditor.client.McguieditorClient.windowSets;
+import static kr1v.mcguieditor.client.McguieditorClient.*;
 
 public class GuiEditScreen extends Screen {
     public static int addChildIndex = 0;
@@ -37,7 +37,7 @@ public class GuiEditScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         ImGuiImpl.draw(this::renderImGui);
     }
-
+    private boolean aiaiaiiaiaiaii = false;
     private void renderImGui(final ImGuiIO io) {
         windowPositions = new ArrayList<>();
         int windowFlags = NoSavedSettings + NoTitleBar + NoCollapse;
@@ -46,6 +46,27 @@ public class GuiEditScreen extends Screen {
         if (firstRun) {
             counter++;
         }
+
+        if (aiaiaiiaiaiaii) {
+            ImGui.begin(" ", windowFlags);
+            ImGui.text("Reset to defaults!");
+            ImGui.text("Backup saved to: " + parent.getTitle().getString() + ".backup.json");
+            if (ImGui.button("OK")) aiaiaiiaiaiaii = false;
+            ImGui.end();
+        }
+
+        ImGui.begin(" ", windowFlags);
+        if (ImGui.button("Cancel")) {
+            assert client != null;
+            client.setScreen(parent);
+        }
+        if (ImGui.button("Save and quit")) {
+            this.close();
+        }
+        if (ImGui.button("Reset to defaults")) {
+            resetToDefaults();
+        }
+        ImGui.end();
 
         for (Drawable drawable : ((ScreenAccessor) parent).getDrawables()) {
             if (drawable instanceof ClickableWidget widget) {
@@ -64,12 +85,25 @@ public class GuiEditScreen extends Screen {
         firstRun = false;
     }
 
+    public void resetToDefaults() {
+        aiaiaiiaiaiaii = true;
+        try {
+            JsonUtils.writeToJson(windowPositions, McguieditorClient.configDir + parent.getTitle().getString() + ".backup.json");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        resetToDefaults.add(parent.getTitle().getString());
+        assert client != null;
+        Screen s = parent;
+        s.onDisplayed();
+        s.init(client, client.getWindow().getScaledWidth(), client.getWindow().getScaledHeight());
+        client.setScreen(new GuiEditScreen(s.getTitle(), s));
+    }
+
     @Override
     public void close() {
         System.out.println("New thingy");
-        windowSets.put(this.parent.getTitle().getString(), windowPositions);
-        System.out.println();
-        System.out.println();
+        windowSets.put(parent.getTitle().getString(), windowPositions);
         addChildIndex = 0;
         assert client != null;
         client.setScreen(null);

@@ -10,6 +10,8 @@ import java.util.*;
 import static net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper.*;
 
 public class McguieditorClient implements ClientModInitializer {
+    public static String configDir = "";
+    public static Set<String> resetToDefaults = new HashSet<>();
     public static Map<String, List<Window>> windowSets = new HashMap<>();
     public static KeyBinding keyBinding;
     public static int counter = 0;
