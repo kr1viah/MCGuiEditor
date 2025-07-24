@@ -9,7 +9,7 @@ import kr1v.mcguieditor.client.imgui.ImGuiImpl;
 import kr1v.mcguieditor.client.mixin.ScreenAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.text.Text;
@@ -37,7 +37,6 @@ public class GuiEditScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         ImGuiImpl.draw(this::renderImGui);
     }
-    private boolean aiaiaiiaiaiaii = false;
     private void renderImGui(final ImGuiIO io) {
         windowPositions = new ArrayList<>();
         int windowFlags = NoSavedSettings + NoTitleBar + NoCollapse;
@@ -45,14 +44,6 @@ public class GuiEditScreen extends Screen {
 
         if (firstRun) {
             counter++;
-        }
-
-        if (aiaiaiiaiaiaii) {
-            ImGui.begin(" ", windowFlags);
-            ImGui.text("Reset to defaults!");
-            ImGui.text("Backup saved to: " + parent.getTitle().getString() + ".backup.json");
-            if (ImGui.button("OK")) aiaiaiiaiaiaii = false;
-            ImGui.end();
         }
 
         ImGui.begin(" ", windowFlags);
@@ -68,9 +59,10 @@ public class GuiEditScreen extends Screen {
         }
         ImGui.end();
 
-        for (Drawable drawable : ((ScreenAccessor) parent).getDrawables()) {
+        for (Selectable drawable : ((ScreenAccessor) parent).getSelectables()) {
             if (drawable instanceof ClickableWidget widget) {
-//                if (widget instanceof TextIconButtonWidget.IconOnly) continue;
+                if (firstRun)
+                    System.out.println(drawable.getClass().getName() + " is instanceof Widget");
                 ImGui.setNextWindowPos(widget.getX() * guiScale, widget.getY() * guiScale, ImGuiCond.Appearing);
                 ImGui.setNextWindowSize(widget.getWidth() * guiScale, widget.getHeight() * guiScale, ImGuiCond.Appearing);
                 String name = widget.getMessage().getString();
@@ -78,17 +70,18 @@ public class GuiEditScreen extends Screen {
                 ImGui.begin(name + counter, new ImBoolean(true), windowFlags);
                 ImGui.text(name);
                 assert client != null;
-                windowPositions.add(new Window(ImGui.getWindowPos(), ImGui.getWindowSize(), new ImVec2(client.getWindow().getWidth(), client.getWindow().getHeight()), widget));
+                windowPositions.add(new Window(ImGui.getWindowPos(), ImGui.getWindowSize(), widget, new ImVec2(widget.getX(), widget.getY())));
                 ImGui.end();
-            }
+            } else if (firstRun)
+                System.out.println(drawable.getClass().getName() + " is NOT instanceof Widget");
         }
         firstRun = false;
     }
 
     public void resetToDefaults() {
-        aiaiaiiaiaiaii = true;
         try {
-            JsonUtils.writeToJson(windowPositions, McguieditorClient.configDir + parent.getTitle().getString() + ".backup.json");
+            if (!parent.getTitle().getString().isEmpty())
+                JsonUtils.writeToJson(windowPositions, McguieditorClient.configDir + parent.getTitle().getString() + ".backup.json");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
